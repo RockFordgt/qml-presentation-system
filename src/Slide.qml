@@ -93,7 +93,7 @@ Item {
     property color titleColor: parent.titleColor;
     property color textColor: parent.textColor;
     property string fontFamily: parent.fontFamily;
-    property int textFormat: Text.PlainText
+    property int textFormat: Text.RichText
 
     visible: false
     // return false if ther is no more elements to show
