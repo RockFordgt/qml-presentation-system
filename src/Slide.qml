@@ -67,6 +67,7 @@ Item {
 
     property string title;
     property variant content: []
+    property variant toShow: []
     property string centeredText
     property string writeInText;
     property string notes;
@@ -95,6 +96,16 @@ Item {
     property int textFormat: Text.PlainText
 
     visible: false
+    // return false if ther is no more elements to show
+    function showNext(){
+        for( var i=0; i< toShow.length; i++){
+            if( !toShow[i].visible ){
+                toShow[i].visible=true;
+                return true;
+            }
+        }
+        return false;
+    }
 
     Text {
         id: titleText

@@ -41,15 +41,18 @@
 
 
 import QtQuick 2.5
-import QtQuick.Window 2.0
+import QtQuick.Window 2.1
 
-Item {
+Item{
     id: root
+
+    property bool isPresentation: true
 
     property variant slides: []
     property int currentSlide: 0
 
-    property bool showNotes: false;
+    property bool showNotes: false
+    property bool showSlideList: false
     property bool allowDelay: true;
     property alias mouseNavigation: mouseArea.enabled
     property bool arrowNavigation: true
@@ -95,23 +98,33 @@ Item {
     }
 
     function goToNextSlide() {
-        root._userNum = 0
-        if (_faded)
-            return
-        if (root.slides[currentSlide].delayPoints) {
-            if (root.slides[currentSlide]._advance())
-                return;
+        if(!slides[currentSlide].showNext()){
+            root._userNum = 0
+            if (_faded)
+                return
+            if (root.currentSlide + 1 < root.slides.length) {
+                var from = slides[currentSlide]
+                var to = slides[currentSlide + 1]
+                if (switchSlides(from, to, true)) {
+                    currentSlide = currentSlide + 1;
+                    root.focus = true;
+                }
+            }
         }
-        if (currentSlide + 1 < root.slides.length)
-            ++currentSlide;
     }
 
     function goToPreviousSlide() {
         root._userNum = 0
         if (root._faded)
             return
-        if (currentSlide - 1 >= 0)
-            --currentSlide;
+        if (root.currentSlide - 1 >= 0) {
+            var from = slides[currentSlide]
+            var to = slides[currentSlide - 1]
+           if (switchSlides(from, to, false)) {
+                currentSlide = currentSlide - 1;
+               root.focus = true;
+           }
+        }
     }
 
     function goToUserSlide() {
@@ -120,13 +133,18 @@ Item {
             return
         if (_userNum < 0)
             goToNextSlide()
-        else {
-            currentSlide = _userNum;
-            root.focus = true;
+        else if (root.currentSlide != _userNum) {
+            var from = slides[currentSlide]
+            var to = slides[_userNum]
+           if (switchSlides(from, to, _userNum > currentSlide)) {
+                currentSlide = _userNum;
+               root.focus = true;
+           }
         }
     }
 
     // directly type in the slide number: depends on root having focus
+    Keys.onTabPressed: showSlideList = !showSlideList
     Keys.onPressed: {
         if (event.key >= Qt.Key_0 && event.key <= Qt.Key_9)
             _userNum = 10 * _userNum + (event.key - Qt.Key_0)
@@ -145,7 +163,10 @@ Item {
 
     // presentation-specific single-key shortcuts (which interfere with normal typing)
     Shortcut { sequence: " "; enabled: root.keyShortcutsEnabled; onActivated: goToNextSlide() }
+    ///TODO: Shortcut { sequence: ?Qt.Key_backspace; enabled: root.keyShortcutsEnabled; onActivated: goToPreviousSlide() }
+    ///TODO: Shortcut { sequence: ?Qt.TabPressed; enabled: root.keyShortcutsEnabled; onActivated: showSlideList = !showSlideList }
     Shortcut { sequence: "c"; enabled: root.keyShortcutsEnabled; onActivated: root._faded = !root._faded }
+    Shortcut { sequence: "n"; enabled: root.keyShortcutsEnabled; onActivated: root.showNotes = !root.showNotes }
 
     // standard shortcuts
     Shortcut { sequence: StandardKey.MoveToNextPage; onActivated: goToNextSlide() }
@@ -236,6 +257,66 @@ Item {
                     }
                 }
             }
+        }
+        onVisibilityChanged: {
+            root.focus = true
+        }
+        onClosing:{
+            root.showNotes = false;
+        }
+    }
+    Window{
+        id: slideList;
+        width: 400
+        height: 300
+        title: "List of slides"
+        visible: root.showSlideList
+        Rectangle{
+            anchors.fill: parent
+            border.color: "tomato"
+            ListView{
+            //            anchors.left: parent.lft
+            //            anchors.top:parent.top
+            //width: parent.width
+            //height: parent.height
+            anchors.fill: parent
+            model: root.slides
+            delegate:Rectangle{
+                id:background
+                width: slideList.width
+                height: 30
+                Text {
+                    id: no
+                    anchors.fill: parent
+                    text: index + " " + root.slides[index].title
+                    font.bold: index == currentSlide
+                    //width: 80
+                    height: font.pixelSize + 5
+                    verticalAlignment: Text.AlignVCenter
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        var from = slides[currentSlide]
+                        var to = slides[index]
+                        if (switchSlides(from, to, true)) {
+                            currentSlide = index
+                            root.focus = true;
+                        }
+                    }
+                    onEntered: {
+                        background.color = "tomato"
+                    }
+                    onExited: {
+                        background.color = "white"
+                    }
+                }
+               }
+            }
+        }
+        onClosing:{
+            root.showSlideList = false;
         }
     }
 }
