@@ -44,13 +44,15 @@ import QtQuick 2.0
 
 Item {
     id: root;
-    implicitHeight: 130
+    implicitHeight: listView.contentHeight * 1.2
 
     property Presentation presentation
     property string codeFontFamily //parent.codeFontFamily;
     property string code
-    property real codeFontSize
+    property real codeFontSize: parentSlide.baseFontSize * 0.5;
     property Slide parentSlide
+    property int lineCount: listModel.count
+    property real lineHight:10
 
     function checkParentPrezentation(myParent){
         //console.log("checkParentPrezentation:" + myParent + ":" + myParent.parent)
@@ -72,7 +74,6 @@ Item {
         checkParentPrezentation(parent);
         checkSlide(parent);
         codeFontFamily = presentation.codeFontFamily;
-        codeFontSize = parentSlide.baseFontSize * 0.6;
     }
 
     Rectangle {
