@@ -47,15 +47,13 @@ Item {
     implicitHeight: listView.contentHeight * 1.2
 
     property Presentation presentation
-    property string codeFontFamily //parent.codeFontFamily;
-    property string code
+    property string codeFontFamily
+    property variant code:[]
     property real codeFontSize: parentSlide.baseFontSize * 0.5;
     property Slide parentSlide
-    property int lineCount: listModel.count
     property real lineHight:10
 
     function checkParentPrezentation(myParent){
-        //console.log("checkParentPrezentation:" + myParent + ":" + myParent.parent)
         if(myParent.isPresentation){
             presentation=myParent
         } else if (myParent.parent !== null) {
@@ -77,6 +75,7 @@ Item {
     }
 
     Rectangle {
+        property real bw: height / 250
         id: background
         anchors.fill: parent
         radius: height / 10;
@@ -85,19 +84,8 @@ Item {
             GradientStop { position: 1; color: Qt.rgba(0.2, 0.2, 0.2, 0.5); }
         }
         border.color: parentSlide.textColor;
-        border.width: height / 250;
+        border.width: bw < 0.53 ? 0.53 : (bw > 1 ? 1 : bw)
         antialiasing: true
-    }
-
-    onCodeChanged: {
-        listModel.clear();
-        var codeLines = root.code.split("\n");
-        for (var i=0; i<codeLines.length; ++i) {
-            listModel.append({
-                                line: i,
-                                code: codeLines[i]
-                             });
-        }
     }
 
     onVisibleChanged: {
@@ -107,9 +95,6 @@ Item {
             showTheCode.start();
     }
 
-    ListModel {
-        id: listModel
-    }
     ListView {
         id: listView;
 
@@ -117,7 +102,7 @@ Item {
         anchors.margins: background.radius / 2
         clip: true
 
-        model: listModel;
+        model: code;
         focus: true;
 
         MouseArea {
@@ -147,7 +132,7 @@ Item {
             Text {
                 id: lineLabel
                 anchors.right: lineLabelBackground.right;
-                text: (line+1) + ":"
+                text: (index+1) + ":"
                 color: parentSlide.textColor;
                 font.family: root.codeFontFamily
                 font.pixelSize: root.codeFontSize
@@ -171,7 +156,7 @@ Item {
                 anchors.leftMargin: lineContent.height;
                 anchors.right: parent.right;
                 color: parentSlide.textColor;
-                text: code;
+                text: code[index];
                 font.family: root.codeFontFamily
                 font.pixelSize: root.codeFontSize
                 font.bold: itemDelegate.ListView.isCurrentItem;
