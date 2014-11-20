@@ -44,6 +44,7 @@
 #define SLIDEVIEW_H
 
 #include <QQuickView>
+#include <QOpenGLFramebufferObject>
 #include <QPrinter>
 #include <QPainter>
 
@@ -63,12 +64,15 @@ public slots:
     void goToNextSlide();
 
 private:
-    int m_slidesLeft;
-    int m_printedSlides;
+     QQuickItem *m_rootItem;
+    int m_slidesCount;
+    int m_currentSlide;
     int m_tid;
+    QRect m_paintRect;
 
     QPrinter m_printer;
     QPainter m_painter;
+    QOpenGLFramebufferObject *m_fbo;
 };
 
 #endif        //  #ifndef SLIDEVIEW_H
