@@ -47,7 +47,7 @@ Item {
     implicitHeight: listView.contentHeight * 1.2
 
     property Presentation presentation
-    property string codeFontFamily
+    property string codeFontFamily : presentation.codeFontFamily
     property variant code:[]
     property real codeFontSize: parentSlide.baseFontSize * 0.5;
     property Slide parentSlide
@@ -71,7 +71,6 @@ Item {
     Component.onCompleted: {
         checkParentPrezentation(parent);
         checkSlide(parent);
-        codeFontFamily = presentation.codeFontFamily;
     }
 
     Rectangle {
