@@ -44,6 +44,7 @@ import QtQuick 2.5
 import QtQuick.Window 2.1
 
 Item{
+
     id: root
 
     property bool isPresentation: true
@@ -65,8 +66,9 @@ Item{
 
     // Private API
     property bool _faded: false
-    property int _userNum;
+    property int _userNum
     property int _lastShownSlide: 0
+    property Window parentWindow
 
     Component.onCompleted: {
         var slideCount = 0;
@@ -201,6 +203,8 @@ Item{
 
         title: "QML Presentation: Notes"
         visible: root.showNotes
+        modality:Qt.NonModal
+        property bool returnFocus: true
 
         Flickable {
             anchors.fill: parent
@@ -258,11 +262,20 @@ Item{
                 }
             }
         }
-        onVisibilityChanged: {
-            root.focus = true
+        onVisibleChanged: {
+            if(!visible){
+                returnFocus = false;
+            }
         }
+
         onClosing:{
             root.showNotes = false;
+        }
+        onActiveChanged: {
+            if(returnFocus){
+                parentWindow.requestActivate();
+                returnFocus = false;
+            }
         }
     }
     Window{
@@ -271,6 +284,7 @@ Item{
         height: 300
         title: "List of slides"
         visible: root.showSlideList
+        property bool returnFocus: true
         Rectangle{
             anchors.fill: parent
             border.color: "tomato"
@@ -302,7 +316,8 @@ Item{
                         var to = slides[index]
                         if (switchSlides(from, to, true)) {
                             currentSlide = index
-                            root.focus = true;
+                            slideList.returnFocus = true;
+                            parentWindow.requestActivate()
                         }
                     }
                     onEntered: {
@@ -317,6 +332,12 @@ Item{
         }
         onClosing:{
             root.showSlideList = false;
+        }
+        onActiveChanged: {
+            if(active && slideList.returnFocus){
+                parentWindow.requestActivate();
+                returnFocus = false;
+            }
         }
     }
 }

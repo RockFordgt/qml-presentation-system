@@ -68,6 +68,7 @@ Item {
     property string title;
     property variant content: []
     property variant toShow: []
+    property int currShowIndex:0
     property string centeredText
     property string writeInText;
     property string notes;
@@ -98,14 +99,28 @@ Item {
     visible: false
     // return false if ther is no more elements to show
     function showNext(){
-        for( var i=0; i< toShow.length; i++){
-            if( !toShow[i].visible ){
-                toShow[i].visible=true;
+        if(toShow.length > 0){
+            if(currShowIndex < toShow.length){
+                toShow[currShowIndex].visible = true;
+                currShowIndex = currShowIndex + 1;
                 return true;
             }
         }
         return false;
     }
+
+    function sequentialItemsBack(){
+        if(toShow.length > 0){
+            currShowIndex = currShowIndex - 1;
+            if(currShowIndex < 0 ){
+                currShowIndex = 0;
+            } else {
+                toShow[currShowIndex].visible = false;
+            }
+            parent.focus = true;
+        }
+    }
+
 
     Text {
         id: titleText
