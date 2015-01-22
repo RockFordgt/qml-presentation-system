@@ -263,9 +263,9 @@ Item{
             }
         }
         onVisibleChanged: {
-            if(!visible){
-                returnFocus = false;
-            }
+//            if(!visible){
+//                returnFocus = false;
+//            }
         }
 
         onClosing:{
@@ -302,7 +302,7 @@ Item{
                 Text {
                     id: no
                     anchors.fill: parent
-                    text: index + " " + root.slides[index].title
+                    text: (index+1) + " " + root.slides[index].title
                     font.bold: index == currentSlide
                     //width: 80
                     height: font.pixelSize + 5
