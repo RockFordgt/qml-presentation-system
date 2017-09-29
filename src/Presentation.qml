@@ -146,7 +146,7 @@ Item{
     }
 
     // directly type in the slide number: depends on root having focus
-    Keys.onTabPressed: showSlideList = !showSlideList
+    //Keys.onTabPressed: showSlideList = !showSlideList
     Keys.onPressed: {
         if (event.key >= Qt.Key_0 && event.key <= Qt.Key_9)
             _userNum = 10 * _userNum + (event.key - Qt.Key_0)
@@ -166,7 +166,7 @@ Item{
     // presentation-specific single-key shortcuts (which interfere with normal typing)
     Shortcut { sequence: " "; enabled: root.keyShortcutsEnabled; onActivated: goToNextSlide() }
     ///TODO: Shortcut { sequence: ?Qt.Key_backspace; enabled: root.keyShortcutsEnabled; onActivated: goToPreviousSlide() }
-    ///TODO: Shortcut { sequence: ?Qt.TabPressed; enabled: root.keyShortcutsEnabled; onActivated: showSlideList = !showSlideList }
+    Shortcut { sequence: "`"; enabled: root.keyShortcutsEnabled; onActivated: showSlideList = !showSlideList }
     Shortcut { sequence: "c"; enabled: root.keyShortcutsEnabled; onActivated: root._faded = !root._faded }
     Shortcut { sequence: "n"; enabled: root.keyShortcutsEnabled; onActivated: root.showNotes = !root.showNotes }
 
@@ -289,50 +289,51 @@ Item{
             anchors.fill: parent
             border.color: "tomato"
             ListView{
-            //            anchors.left: parent.lft
-            //            anchors.top:parent.top
-            //width: parent.width
-            //height: parent.height
-            anchors.fill: parent
-            model: root.slides
-            delegate:Rectangle{
-                id:background
-                width: slideList.width
-                height: 30
-                Text {
-                    id: no
-                    anchors.fill: parent
-                    text: (index+1) + " " + root.slides[index].title
-                    font.bold: index == currentSlide
-                    //width: 80
-                    height: font.pixelSize + 5
-                    verticalAlignment: Text.AlignVCenter
-                }
-                MouseArea{
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        var from = slides[currentSlide]
-                        var to = slides[index]
-                        if (switchSlides(from, to, true)) {
-                            currentSlide = index
-                            slideList.returnFocus = true;
-                            parentWindow.requestActivate()
+                anchors.left: parent.lft
+                anchors.top:parent.top
+                width: parent.width
+                height: parent.height
+                //anchors.fill: parent
+                model: root.slides
+                delegate:Rectangle{
+                    id:background
+                    width: 100//lideList.width
+                    height: 30
+                    Text {
+                        id: no
+                        anchors.fill: parent
+                        text: (index+1) + " " + root.slides[index].title ? root.slides[index].title : "Slide"
+                        font.bold: index == currentSlide
+                        //width: 80
+                        height: font.pixelSize + 5
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            var from = slides[currentSlide]
+                            var to = slides[index]
+                            if (switchSlides(from, to, true)) {
+                                currentSlide = index
+                                slideList.returnFocus = true;
+                                parentWindow.requestActivate()
+                            }
+                        }
+                        onEntered: {
+                            background.color = "tomato"
+                        }
+                        onExited: {
+                            background.color = "white"
                         }
                     }
-                    onEntered: {
-                        background.color = "tomato"
-                    }
-                    onExited: {
-                        background.color = "white"
-                    }
                 }
-               }
             }
         }
-        onClosing:{
-            root.showSlideList = false;
+        onVisibleChanged: {
+            console.log("slide list:", root.slides );
         }
+
         onActiveChanged: {
             if(active && slideList.returnFocus){
                 parentWindow.requestActivate();
