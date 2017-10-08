@@ -66,6 +66,7 @@ Item {
     }
 
     property string title;
+    property alias visibleTitle: titleText.visible
     property variant content: []
     property variant toShow: []
     property int currShowIndex:0

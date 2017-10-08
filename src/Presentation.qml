@@ -97,6 +97,7 @@ Item{
     onCurrentSlideChanged: {
         switchSlides(root.slides[_lastShownSlide], root.slides[currentSlide], currentSlide > _lastShownSlide)
         _lastShownSlide = currentSlide
+        slideList.repositionTheView();
     }
 
     function goToNextSlide() {
@@ -229,7 +230,7 @@ Item{
                     font.pixelSize: 16
                     wrapMode: Text.WordWrap
 
-                    property string notes: root.slides[root.currentSlide].notes;
+                    property string notes: root.slides && root.slides[root.currentSlide] ? root.slides[root.currentSlide].notes : ""
 
                     onNotesChanged: {
                         var result = "";
@@ -285,26 +286,33 @@ Item{
         title: "List of slides"
         visible: root.showSlideList
         property bool returnFocus: true
+        function repositionTheView() {
+            if (slideList.active) {
+                slidesList.positionViewAtIndex(root.currentSlide, ListView.Center);
+            }
+        }
+
         Rectangle{
             anchors.fill: parent
             border.color: "tomato"
             ListView{
+                id: slidesList
                 anchors.left: parent.lft
-                anchors.top:parent.top
-                width: parent.width
-                height: parent.height
-                //anchors.fill: parent
+                anchors.top: parent.top
+//                width: 100
+//                height: 100
+                anchors.fill: parent
                 model: root.slides
                 delegate:Rectangle{
                     id:background
-                    width: 100//lideList.width
+                    width:  slidesList.width
                     height: 30
                     Text {
                         id: no
                         anchors.fill: parent
                         text: (index+1) + " " + root.slides[index].title ? root.slides[index].title : "Slide"
                         font.bold: index == currentSlide
-                        //width: 80
+                        width: 80
                         height: font.pixelSize + 5
                         verticalAlignment: Text.AlignVCenter
                     }
@@ -331,13 +339,19 @@ Item{
             }
         }
         onVisibleChanged: {
-            console.log("slide list:", root.slides );
+            if (slidesList.model != root.slides)  {
+                console.log("updating the model");
+                slidesList.model = root.slides;
+            }
+            repositionTheView();
         }
 
         onActiveChanged: {
             if(active && slideList.returnFocus){
                 parentWindow.requestActivate();
                 returnFocus = false;
+            } else {
+                returnFocus = true;
             }
         }
     }
