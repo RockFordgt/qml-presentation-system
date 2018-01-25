@@ -194,6 +194,10 @@ Item{
             else
                 goToNextSlide()
         }
+        onDoubleClicked: {
+            goToPreviousSlide();
+        }
+
         onPressAndHold: goToPreviousSlide(); //A back mechanism for touch only devices
     }
 
